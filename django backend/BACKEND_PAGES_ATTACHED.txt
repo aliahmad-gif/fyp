@@ -1,0 +1,36 @@
+============================================
+  Backend – sab folders / pages attach
+============================================
+Base URL (Figma frontend isi se connect): http://localhost:8000
+
+--------------------------------------------
+1. accounts (Login, Signup, Profile)
+--------------------------------------------
+  /api/auth/register/          – Sign up
+  /api/auth/verify-signup-otp/ – OTP verify
+  /api/auth/login/             – Login
+  /api/auth/request-password-reset/
+  /api/auth/reset-password/
+  /api/auth/profile/           – GET/PATCH profile (Figma: Profile page)
+
+--------------------------------------------
+2. orders (Cart, Shipping, Payment)
+--------------------------------------------
+  /api/checkout/         – Checkout create (Figma: Cart → Shipping)
+  /api/verify-shipping/   – Shipping form verify
+  /api/verify-payment/    – Payment verify (Figma: Payment, ThankYou)
+
+--------------------------------------------
+3. tailors (Tailor Discovery, Dashboard)
+--------------------------------------------
+  /api/tailors/              – List tailors (Figma: Discovery page)
+  /api/tailors/create/       – Create tailor
+  /api/tailors/<id>/         – Detail
+  /api/tailors/<id>/update/
+  /api/tailors/<id>/delete/
+
+--------------------------------------------
+Saari list dekhne ke liye
+--------------------------------------------
+Browser me open karein: http://localhost:8000/
+JSON me sab endpoints dikhenge.
