@@ -1,0 +1,55 @@
+============================================
+  FYP - Projects kaise chalayein
+============================================
+
+OPTION 0 - FRONTEND + BACKEND (Figma + Django - recommended)
+-----------------------------------------------------
+  Double-click: RUN_FRONTEND_AND_BACKEND.bat
+  Backend (Django) port 8000 + Frontend (Figma) port 5177 dono chalenge.
+  Browser: http://localhost:5177  (Backend API: http://localhost:8000)
+
+OPTION 0b - Sirf Figma (backend bina)
+-----------------------------------------------------
+  Double-click: RUN_FIGMA_LANDING_ALL_PAGES.bat
+  Home = LandingPage3D, Cart, Discovery, Measurement, Product, Profile - sab
+  Browser: http://localhost:5177
+
+OPTION 1 - Sirf 3D Landing Page (pehle ye try karein)
+-----------------------------------------------------
+  Double-click: RUN_3D_LANDING_ONLY.bat
+  Browser me open karein: http://localhost:5173
+
+
+OPTION 2 - Sab projects ek saath
+-----------------------------------------------------
+  Double-click: RUN_ALL.bat
+  7 alag windows open hongi. Har window me link dikhega.
+
+  Links:
+    3D Landing:     http://localhost:5173
+    ALI Dashboard:  http://localhost:8000
+    Login:          http://localhost:5174
+    Measurement:    http://localhost:5175
+    Tailor:         http://localhost:5176
+    Figma:          http://localhost:5177
+    Django:         http://localhost:8001
+
+
+OPTION 3 - Ek ek project alag se
+-----------------------------------------------------
+  Kisi bhi project folder me jao, wahan run.bat double-click karein.
+  Example: "3d landing page" folder kholo -> run.bat double-click
+
+
+Zaroori
+-----------------------------------------------------
+  - Node.js installed hona chahiye (nodejs.org se download)
+  - Pehli baar run.bat chalane par npm install khud chalega
+  - Django ke liye Python bhi chahiye
+
+
+Agar run nahi ho raha
+-----------------------------------------------------
+  1. Node check: CMD me likho "node -v" -> version aani chahiye
+  2. Sirf ek project: RUN_3D_LANDING_ONLY.bat chalayein
+  3. Us project folder me khud jao, "npm install" run karo, phir run.bat
