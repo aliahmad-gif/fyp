@@ -1,0 +1,19 @@
+Run the dashboard from THIS folder only
+========================================
+
+1. Close Cursor/VS Code and any terminal using this project (so no app locks files).
+
+2. In PowerShell, go to THIS folder:
+   cd "D:\web all work fyp\smart fitao ai website complete\front-end fyp 0figma\ALI new DashBoard final 11-3-26\tailor nauman front end dashboard tailor\tailor nauman front end dashboard tailor\react-dashboard"
+
+3. Remove broken node_modules and reinstall:
+   rmdir /s /q node_modules
+   del package-lock.json
+   npm install
+
+4. Start the app:
+   npm run dev
+
+5. Open in browser: http://localhost:5176 (or the port Vite shows)
+
+If npm install still fails (EPERM/EBUSY), restart Windows and try again from step 2.

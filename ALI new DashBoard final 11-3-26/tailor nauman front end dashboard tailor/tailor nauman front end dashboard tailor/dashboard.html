@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartTailor | Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --primary: #059669;
+            --primary-glow: rgba(5, 150, 105, 0.4);
+            --primary-light: #ECFDF5;
+            --secondary: #4F46E5;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --bg-body: #F3F4F6;
+            --surface: #FFFFFF;
+            --sidebar-bg: #e8dcc8;
+            --header-bg: #e8dcc8;
+            --text-main: #111827;
+            --text-muted: #4B5563;
+            --border: #D1D5DB;
+            --sidebar-width: 260px;
+            --radius-xl: 24px;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --shadow-float: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            z-index: 50;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 3rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            background-color: rgba(255, 255, 255, 0.3);
+            transition: 0.2s;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.6);
+            color: var(--primary);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            height: 100vh;
+            position: relative;
+            background: var(--bg-body);
+            overflow: hidden;
+        }
+
+        .global-header {
+            height: 80px;
+            background: var(--header-bg);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2.5rem;
+            position: absolute;
+            top: 0;
+            width: 100%;
+        }
+
+        .content-body {
+            height: 100%;
+            overflow-y: auto;
+            padding-top: 80px;
+        }
+
+        .view-section {
+            padding: 2.5rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Analytics Specific */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-container {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border);
+            height: 400px;
+            margin-bottom: 2rem;
+        }
+
+        .order-status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .status-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .status-count {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .recent-orders-section {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .orders-table th,
+        .orders-table td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .badge-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .badge-status.paid {
+            background: #ECFDF5;
+            color: #10B981;
+        }
+
+        .period-selector {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .period-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: white;
+            cursor: pointer;
+        }
+
+        .period-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo">SmartTailor</div>
+        <nav class="nav-menu">
+            <a href="dashboard.html" class="nav-item active">Home</a>
+            <a href="order.html" class="nav-item">Orders</a>
+            <a href="reviews.html" class="nav-item">Reviews</a>
+            <a href="income.html" class="nav-item">Income</a>
+            <a href="messages.html" class="nav-item">Messages</a>
+            <a href="profile.html" class="nav-item">Me</a>
+        </nav>
+    </aside>
+
+    <main class="main-wrapper">
+        <header class="global-header">
+            <div class="header-left">
+                <h2>Analytics Dashboard</h2>
+            </div>
+            <div class="header-right">
+                <a href="profile.html" class="profile-header"
+                    style="display: flex; align-items: center; gap: 1rem; text-decoration: none; color: inherit;">
+                    <div class="profile-info" style="text-align: right;">
+                        <h4 style="font-size:0.95rem; font-weight: 600;">Nauman Irshad</h4>
+                        <p style="font-size:0.75rem; color:var(--text-muted);">Tailor Shop</p>
+                    </div>
+                    <img src="images/2.png"
+                        style="width:44px; height:44px; border-radius:50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                </a>
+            </div>
+        </header>
+
+        <div class="content-body">
+            <div class="view-section">
+                <div class="analytics-grid">
+                    <div class="stat-card">
+                        <div>
+                            <span class="stat-label">Total Sales</span>
+                            <div style="display:flex; align-items:baseline; gap:0.5rem; margin-top:0.25rem;">
+                                <span class="stat-value" style="font-size:1.8rem; font-weight:700;">34,945</span>
+                                <span class="badge-status paid">+1.56%</span>
+                            </div>
+                        </div>
+                        <div style="height: 60px; width: 100%; position: relative;">
+                            <canvas id="spark1"></canvas>
+                        </div>
+                    </div>
+                    <!-- Add other cards here similarly if needed -->
+                </div>
+
+                <div class="chart-container">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                        <h3 class="chart-title">Sales vs Profit Report</h3>
+                        <div class="period-selector">
+                            <button class="period-btn active" onclick="updateChart('Week 1')">Week 1</button>
+                            <button class="period-btn" onclick="updateChart('Week 3')">Week 3</button>
+                        </div>
+                    </div>
+                    <canvas id="salesChart"></canvas>
+                </div>
+
+                <div class="order-status-grid">
+                    <div class="status-card" onclick="window.location.href='order.html'">
+                        <div class="status-count">124</div>
+                        <div class="status-label">Total Orders</div>
+                    </div>
+                    <div class="status-card" onclick="window.location.href='order.html'">
+                        <div class="status-count" style="color:#EF4444;">12</div>
+                        <div class="status-label">Cancelled Orders</div>
+                    </div>
+                </div>
+
+                <div class="recent-orders-section">
+                    <h3 style="margin-bottom:1.5rem;">Recent Orders</h3>
+                    <div class="table-container">
+                        <table class="orders-table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Product</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><b>OD-1001</b></td>
+                                    <td>Ayesha Khan</td>
+                                    <td>Formal Shirt</td>
+                                    <td><span class="badge-status paid">PAID</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>OD-1002</b></td>
+                                    <td>Sara Ali</td>
+                                    <td>Summer Dress</td>
+                                    <td><span class="badge-status paid">PAID</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Chart Configuration
+        Chart.defaults.font.family = "'Outfit', sans-serif";
+        Chart.defaults.color = '#6B7280';
+        Chart.defaults.scale.grid.color = 'rgba(0, 0, 0, 0.05)';
+
+        // Sparkline Initialization
+        const ctxSpark = document.getElementById('spark1').getContext('2d');
+        new Chart(ctxSpark, {
+            type: 'line',
+            data: {
+                labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+                datasets: [{
+                    data: [12, 18, 15, 25, 20, 30, 28],
+                    borderColor: '#10B981',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                },
+                scales: {
+                    x: { display: false },
+                    y: { display: false }
+                },
+                layout: { padding: 5 }
+            }
+        });
+
+        // Main Sales Chart Initialization
+        const rawData = {
+            'Week 1': [{ sales: 4000, profit: 2400 }, { sales: 3000, profit: 1398 }, { sales: 2000, profit: 9800 }, { sales: 2780, profit: 3908 }, { sales: 1890, profit: 4800 }, { sales: 2390, profit: 3800 }, { sales: 3490, profit: 4300 }],
+            'Week 3': [{ sales: 5000, profit: 3000 }, { sales: 4500, profit: 2800 }, { sales: 3200, profit: 2500 }, { sales: 4000, profit: 3500 }, { sales: 3000, profit: 2000 }, { sales: 4500, profit: 3000 }, { sales: 5000, profit: 4000 }],
+            '1 Month': [{ sales: 4000, profit: 2400 }, { sales: 3000, profit: 1398 }, { sales: 2000, profit: 9800 }, { sales: 2780, profit: 3908 }, { sales: 1890, profit: 4800 }, { sales: 2390, profit: 3800 }, { sales: 3490, profit: 4300 }]
+        };
+
+        let chartInstance = null;
+
+        function initChart(period) {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            const data = rawData[period] || rawData['Week 1'];
+
+            // Create Gradients
+            const gradientSales = ctx.createLinearGradient(0, 0, 0, 400);
+            gradientSales.addColorStop(0, 'rgba(79, 70, 229, 0.4)');
+            gradientSales.addColorStop(1, 'rgba(79, 70, 229, 0)');
+
+            const gradientProfit = ctx.createLinearGradient(0, 0, 0, 400);
+            gradientProfit.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
+            gradientProfit.addColorStop(1, 'rgba(16, 185, 129, 0)');
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [
+                        {
+                            label: 'Total Sales',
+                            data: data.map(d => d.sales),
+                            borderColor: '#4F46E5',
+                            backgroundColor: gradientSales,
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: '#4F46E5',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        },
+                        {
+                            label: 'Total Profit',
+                            data: data.map(d => d.profit),
+                            borderColor: '#10B981',
+                            backgroundColor: gradientProfit,
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: '#10B981',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // Prevents height resizing issues
+                    resizeDelay: 200, // Debounce resize to prevent shaking
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            align: 'end',
+                            labels: {
+                                usePointStyle: true,
+                                boxWidth: 8
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            titleColor: '#111827',
+                            bodyColor: '#4B5563',
+                            borderColor: '#E5E7EB',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: true,
+                            usePointStyle: true
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                borderDash: [4, 4],
+                                drawBorder: false,
+                            },
+                        },
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart(period) {
+            if (chartInstance) {
+                const data = rawData[period] || rawData['Week 1'];
+                chartInstance.data.datasets[0].data = data.map(d => d.sales);
+                chartInstance.data.datasets[1].data = data.map(d => d.profit);
+                chartInstance.update();
+
+                // Update active button state
+                document.querySelectorAll('.period-btn').forEach(btn => btn.classList.remove('active'));
+                const activeBtn = Array.from(document.querySelectorAll('.period-btn')).find(b => b.textContent.includes(period));
+                if (activeBtn) activeBtn.classList.add('active');
+            }
+        }
+
+        window.onload = () => initChart('Week 1');
+    </script>
+</body>
+
+</html>

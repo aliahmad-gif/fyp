@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Selection</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="auth-card">
+            <h1 class="title">Login</h1>
+
+            <div class="role-selection">
+                <!--<div class="role-option" onclick="selectRole('user')">
+                    <input type="radio" id="user-role" name="userRole" class="role-radio" checked>
+                    <label for="user-role" class="role-label">
+                        <i class="fas fa-user"></i>
+                        <span>Continue as User</span>
+                    </label>
+                </div>-->
+
+                <div class="role-option" onclick="selectRole('tailor')">
+                    <input type="radio" id="tailor-role" name="userRole" class="role-radio">
+                    <label for="tailor-role" class="role-label">
+                        <i class="fas fa-scissors"></i>
+                        <span>Become a Tailor</span>
+                    </label>
+                </div>
+
+                <div class="role-option" onclick="selectRole('seller')">
+                    <input type="radio" id="seller-role" name="userRole" class="role-radio">
+                    <label for="seller-role" class="role-label">
+                        <i class="fas fa-store"></i>
+                        <span>Become a Local Seller</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="goToLogin()">Continue</button>
+            </div>
+
+            <p class="footer-text">Select your role to proceed with login</p>
+        </div>
+    </div>
+
+    <script>
+        // Simple JavaScript for index page
+        let selectedRole = 'user';
+
+        function selectRole(role) {
+            selectedRole = role;
+
+            // Uncheck all radio buttons
+            document.querySelectorAll('.role-radio').forEach(radio => {
+                radio.checked = false;
+            });
+
+            // Check the selected one
+            document.getElementById(role + '-role').checked = true;
+
+            // Visual feedback
+            document.querySelectorAll('.role-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+        }
+
+        function goToLogin() {
+            // Store role in localStorage
+            localStorage.setItem('userRole', selectedRole);
+
+            // Redirect based on selected role
+            if (selectedRole === 'user') {
+                window.location.href = 'user-flow/user-login.html';
+            } else if (selectedRole === 'tailor') {
+                window.location.href = 'tailor-flow/tailor-login.html';
+            } else if (selectedRole === 'seller') {
+                window.location.href = 'seller-flow/seller-login.html';
+            }
+        }
+
+        function skipToLogin() {
+            localStorage.setItem('userRole', 'user');
+            window.location.href = 'user-flow/user-login.html';
+        }
+
+        // Add selected class to first option by default
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelector('.role-option').classList.add('selected');
+        });
+    </script>
+</body>
+
+</html>

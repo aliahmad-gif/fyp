@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartTailor | Messages</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #059669;
+            --primary-light: #ECFDF5;
+            --bg-body: #F3F4F6;
+            --surface: #FFFFFF;
+            --sidebar-bg: #e8dcc8;
+            --header-bg: #e8dcc8;
+            --text-main: #111827;
+            --text-muted: #4B5563;
+            --border: #D1D5DB;
+            --sidebar-width: 260px;
+            --radius-md: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-body);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            z-index: 50;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            background-color: rgba(255, 255, 255, 0.3);
+            transition: 0.2s;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.6);
+            color: var(--primary);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+        }
+
+        .global-header {
+            height: 80px;
+            background: var(--header-bg);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            padding: 0 2.5rem;
+        }
+
+        /* Message Layout */
+        .messages-layout {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .messages-sidebar {
+            width: 400px;
+            background: white;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 1rem 1.5rem;
+            background: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-container {
+            padding: 0.5rem 1rem;
+            background: white;
+            border-bottom: 1px solid #f0f2f5;
+        }
+
+        .search-box {
+            background: #f0f2f5;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .msg-tile {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.25rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f2f5;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .msg-tile:hover {
+            background: #f5f6f6;
+        }
+
+        .msg-tile.active {
+            background: #ebebeb;
+        }
+
+        .tile-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin-right: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .tile-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .tile-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2px;
+        }
+
+        .tile-name {
+            font-weight: 500;
+            font-size: 1.05rem;
+            color: #111b21;
+        }
+
+        .tile-time {
+            font-size: 0.75rem;
+            color: #667781;
+        }
+
+        .tile-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tile-label {
+            margin-bottom: 4px;
+            display: flex;
+        }
+
+        .tile-msg {
+            font-size: 0.85rem;
+            color: #667781;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+
+        .badge-role {
+            font-size: 0.6rem;
+            padding: 1px 5px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .role-user {
+            background: #dcf8c6;
+            color: #075e54;
+            border: 1px solid #075e54;
+        }
+
+        .role-tailor {
+            background: #fff9c4;
+            color: #fbc02d;
+            border: 1px solid #fbc02d;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #F9FAFB;
+        }
+
+        .chat-msgs {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chat-bubble {
+            max-width: 70%;
+            padding: 1rem 1.25rem;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .bubble-mine {
+            background: var(--primary-light);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+            border: 1px solid rgba(5, 150, 105, 0.1);
+        }
+
+        .bubble-other {
+            background: white;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        .chat-footer {
+            padding: 1.5rem 2.5rem;
+            background: white;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 1rem;
+        }
+
+        .msg-input {
+            flex: 1;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            outline: none;
+            font-family: inherit;
+        }
+
+        .send-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0 2rem;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo">SmartTailor</div>
+        <nav class="nav-menu">
+            <a href="dashboard.html" class="nav-item">Home</a>
+            <a href="order.html" class="nav-item">Orders</a>
+            <a href="reviews.html" class="nav-item">Reviews</a>
+            <a href="income.html" class="nav-item">Income</a>
+            <a href="messages.html" class="nav-item active">Messages</a>
+            <a href="profile.html" class="nav-item">Me</a>
+        </nav>
+    </aside>
+
+    <main class="main-wrapper">
+        <header class="global-header">
+            <div class="header-left" style="display: flex; align-items: center; gap: 1rem;">
+                <a href="dashboard.html"
+                    style="background:none; border:none; cursor:pointer; color:var(--text-main); display:flex; align-items:center;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                </a>
+                <h2 style="font-size:1.5rem; font-weight:700;">Messages</h2>
+            </div>
+            <div class="header-right" style="margin-left:auto;">
+                <a href="profile.html" class="profile-header"
+                    style="display: flex; align-items: center; gap: 1rem; text-decoration: none; color: inherit;">
+                    <div class="profile-info" style="text-align: right;">
+                        <h4 style="font-size:0.95rem; font-weight: 600;">Nauman Irshad</h4>
+                        <p style="font-size:0.75rem; color:var(--text-muted);">Tailor Shop</p>
+                    </div>
+                    <img src="images/2.png"
+                        style="width:44px; height:44px; border-radius:50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                </a>
+            </div>
+        </header>
+
+        <div class="messages-layout">
+            <div class="messages-sidebar">
+
+                <div style="flex:1; overflow-y:auto;">
+                    <!-- Chat 1: User -->
+                    <div class="msg-tile active" onclick="openChat('malikiqraa951', 'User', this)">
+                        <div class="tile-avatar" style="background:#059669;">M</div>
+                        <div class="tile-content">
+                            <div class="tile-top">
+                                <div class="tile-name">malikiqraa951</div>
+                            </div>
+                            <div class="tile-label">
+                                <span class="badge-role role-user">User</span>
+                            </div>
+                            <div class="tile-msg">asa bn jayega?</div>
+                        </div>
+                    </div>
+
+                    <!-- Chat 2: Seller -->
+                    <div class="msg-tile" onclick="openChat('Master Aslam', 'Seller', this)">
+                        <div class="tile-avatar" style="background:#D97706;">A</div>
+                        <div class="tile-content">
+                            <div class="tile-top">
+                                <div class="tile-name">Master Aslam</div>
+                            </div>
+                            <div class="tile-label">
+                                <span class="badge-role role-tailor">Seller</span>
+                            </div>
+                            <div class="tile-msg">Need more fabric...</div>
+                        </div>
+                    </div>
+
+                    <!-- Chat 3: User -->
+                    <div class="msg-tile" onclick="openChat('Sarah Ali', 'User', this)">
+                        <div class="tile-avatar" style="background:#4F46E5;">S</div>
+                        <div class="tile-content">
+                            <div class="tile-top">
+                                <div class="tile-name">Sarah Ali</div>
+                            </div>
+                            <div class="tile-label">
+                                <span class="badge-role role-user">User</span>
+                            </div>
+                            <div class="tile-msg">Status update?</div>
+                        </div>
+                    </div>
+
+                    <!-- Chat 4: Seller -->
+                    <div class="msg-tile" onclick="openChat('Fabric House', 'Seller', this)">
+                        <div class="tile-avatar" style="background:#7c3aed;">F</div>
+                        <div class="tile-content">
+                            <div class="tile-top">
+                                <div class="tile-name">Fabric House</div>
+                            </div>
+                            <div class="tile-label">
+                                <span class="badge-role role-tailor">Seller</span>
+                            </div>
+                            <div class="tile-msg">New stock arrived.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-area">
+                <div
+                    style="padding:1.25rem 2rem; background:white; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; align-items:center; gap:1rem;">
+                        <div
+                            style="width:12px; height:12px; background:#10B981; border:2px solid white; border-radius:50%; box-shadow:0 0 0 2px #10B981;">
+                        </div>
+                        <div>
+                            <div style="display:flex; align-items:center; gap:0.5rem;">
+                                <div id="activeChatName" style="font-weight:700;">malikiqraa951</div>
+                                <span id="activeChatRole" class="badge-role role-user">User</span>
+                            </div>
+                            <div style="font-size:0.8rem; color:gray;">Working on Order #ORD-2025-001</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-msgs" id="chatContainer">
+                    <div class="chat-bubble bubble-other">Hello, custom Shalwar Kameez for Ali Ahmad?</div>
+                    <div class="chat-bubble bubble-mine">Sure! What size should I follow?</div>
+                </div>
+
+                <div class="chat-footer">
+                    <input type="text" class="msg-input" placeholder="Type a message..." id="msgInput">
+                    <button class="send-btn" onclick="sendChatMsg()">Send</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { sendMessage, listenForAllMessages, listenForChatMessages } from './database.js';
+
+        let messageSubscription = null; // For the active chat
+        let sidebarSubscription = null; // For the sidebar list
+
+        const MY_ROLE = 'tailor';
+        let ACTIVE_CHAT_USER = null; // Currently selected user
+
+        // --- 1. Initialize Sidebar (Group messages by user) ---
+        function initSidebar() {
+            const sidebarContainer = document.querySelector('.messages-sidebar > div');
+
+            sidebarSubscription = listenForAllMessages((allMessages) => {
+                // Group by Contact Name (User or Seller)
+                const contacts = {};
+
+                allMessages.forEach(msg => {
+                    // Logic:
+                    // 1. If sender is ME (Tailor), the contact is the RECEIVER.
+                    // 2. If sender is NOT ME (User/Seller), the contact is the SENDER.
+
+                    let contactName = null;
+                    let contactRole = 'User'; // Default
+
+                    if (msg.sender === MY_ROLE || msg.sender === 'Seller') {
+                        // I sent it. The contact is the receiver.
+                        contactName = msg.receiver || msg.recipient;
+                    } else {
+                        // They sent it.
+                        // If any restricted role sent it, the actual identifying name is the receiver/recipient
+                        if (msg.sender === 'Seller' || msg.sender === 'tailor') {
+                            contactName = msg.receiver || msg.recipient || 'Seller';
+                            contactRole = 'Seller';
+                        } else {
+                            contactName = msg.sender;
+                            contactRole = msg.senderRole || 'User';
+                        }
+                    }
+
+                    if (contactName) {
+                        if (!contacts[contactName]) {
+                            contacts[contactName] = {
+                                name: contactName,
+                                role: contactRole,
+                                lastMsg: msg.text,
+                                time: msg.timestamp
+                            };
+                        } else {
+                            // Update existing contact
+                            contacts[contactName].lastMsg = msg.text;
+                            contacts[contactName].time = msg.timestamp;
+
+                            // If we didn't know the role before (because we only saw my sent msg),
+                            // but now we see a msg FROM them, update the role.
+                            if (msg.sender !== MY_ROLE) {
+                                contacts[contactName].role = msg.senderRole || 'User';
+                            }
+                        }
+                    }
+                });
+
+                // Clear Sidebar List
+                sidebarContainer.innerHTML = '';
+
+                // Render Contacts
+                Object.values(contacts).forEach(contact => {
+                    const tile = document.createElement('div');
+                    tile.className = `msg-tile ${ACTIVE_CHAT_USER === contact.name ? 'active' : ''}`;
+                    tile.onclick = () => openChat(contact.name, contact.role);
+
+                    // Avatar Initials
+                    const initial = contact.name.charAt(0).toUpperCase();
+                    // Random color based on name length
+                    const colors = ['#059669', '#D97706', '#4F46E5', '#7c3aed', '#db2777'];
+                    const color = colors[contact.name.length % colors.length];
+
+                    tile.innerHTML = `
+                        <div class="tile-avatar" style="background:${color};">${initial}</div>
+                        <div class="tile-content">
+                            <div class="tile-top">
+                                <div class="tile-name">${contact.name}</div>
+                            </div>
+                            <div class="tile-label">
+                                <span class="badge-role ${contact.role === 'Seller' ? 'role-tailor' : 'role-user'}">${contact.role}</span>
+                            </div>
+                            <div class="tile-msg">${contact.lastMsg}</div>
+                        </div>
+                    `;
+                    sidebarContainer.appendChild(tile);
+                });
+
+                // If no active chat, select first one automatically
+                if (!ACTIVE_CHAT_USER && Object.keys(contacts).length > 0) {
+                    const firstContact = Object.values(contacts)[0];
+                    openChat(firstContact.name, firstContact.role);
+                }
+            });
+        }
+
+        // --- 2. Open Specific Chat ---
+        window.openChat = function (name, role) {
+            ACTIVE_CHAT_USER = name;
+
+            // UI Updates
+            document.querySelectorAll('.msg-tile').forEach(t => t.classList.remove('active'));
+            // Note: simple class toggle might not work since we rebuild list. 
+            // Better to rely on rebuild or just manual highlight if we found the element.
+            // Re-render will handle highlight on next update, but for instant feedback:
+            // (Skipped for brevity/simplicity to rely on re-render or clicking)
+
+            // Header Update
+            document.getElementById('activeChatName').innerText = name;
+            const roleBadge = document.getElementById('activeChatRole');
+            roleBadge.innerText = role;
+            roleBadge.className = 'badge-role ' + (role === 'Seller' ? 'role-tailor' : 'role-user');
+
+            // Subscribe to specific messages
+            if (messageSubscription) messageSubscription(); // Unsubscribe prev
+
+            const chatContainer = document.getElementById('chatContainer');
+            chatContainer.innerHTML = '<div style="text-align:center; color:gray; padding:1rem;">Loading...</div>';
+
+            messageSubscription = listenForChatMessages(name, MY_ROLE, (messages) => {
+                chatContainer.innerHTML = '';
+
+                messages.forEach(msg => {
+                    // Logic: 
+                    // If msg.sender is ME -> Right.
+                    // If msg.sender is THEM -> Left.
+                    // If msg.sender is someone else (overlap?), ignore or show as Other.
+
+                    const isMine = msg.sender === MY_ROLE || msg.sender === 'Seller';
+                    const isThem = msg.sender === name || (msg.sender !== MY_ROLE && msg.sender !== 'Seller' && (msg.receiver === MY_ROLE || msg.recipient === MY_ROLE || msg.receiver === 'Seller' || msg.recipient === 'Seller'));
+
+                    if (isMine || isThem) {
+                        const bubble = document.createElement('div');
+                        bubble.className = 'chat-bubble ' + (isMine ? 'bubble-mine' : 'bubble-other');
+                        bubble.innerText = msg.text;
+                        chatContainer.appendChild(bubble);
+                    }
+                });
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            });
+        };
+
+        // --- 3. Send Message ---
+        window.sendChatMsg = async function () {
+            const input = document.getElementById('msgInput');
+            const text = input.value.trim();
+
+            if (text && ACTIVE_CHAT_USER) {
+                input.value = '';
+
+                await sendMessage({
+                    text: text,
+                    sender: MY_ROLE,
+                    receiver: ACTIVE_CHAT_USER,
+                    recipient: ACTIVE_CHAT_USER,
+                    chatType: 'user', // From tailor to user
+                    timestamp: Date.now()
+                });
+            } else if (!ACTIVE_CHAT_USER) {
+                alert("Please select a chat to send message.");
+            }
+        };
+
+        // Handle Enter key
+        document.getElementById('msgInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                window.sendChatMsg();
+            }
+        });
+
+        // Initialize on load
+        initSidebar();
+
+    </script>
+</body>
+
+</html>
+```

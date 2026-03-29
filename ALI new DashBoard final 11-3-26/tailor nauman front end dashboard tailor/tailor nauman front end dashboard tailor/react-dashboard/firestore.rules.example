@@ -1,0 +1,25 @@
+// Copy this entire file into Firebase Console > Firestore Database > Rules > Edit rules > Publish
+// Project: smart-fitao-web-app | Collection for chat: Tailor_messages
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /Tailor_messages/{docId} {
+      allow read, write: if true;
+    }
+    match /users/{docId} {
+      allow read, write: if true;
+    }
+    match /orders/{docId} {
+      allow read, write: if true;
+    }
+    match /income/{docId} {
+      allow read, write: if true;
+    }
+    match /reviews/{docId} {
+      allow read, write: if true;
+    }
+    match /tools/{docId} {
+      allow read, write: if true;
+    }
+  }
+}

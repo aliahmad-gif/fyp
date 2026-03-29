@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartTailor | Income</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #059669;
+            --primary-light: #ECFDF5;
+            --bg-body: #F3F4F6;
+            --surface: #FFFFFF;
+            --sidebar-bg: #e8dcc8;
+            --header-bg: #e8dcc8;
+            --text-main: #111827;
+            --text-muted: #4B5563;
+            --border: #D1D5DB;
+            --sidebar-width: 260px;
+            --radius-xl: 24px;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* --- Sidebar & Header (Simplified for restoration) --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            z-index: 50;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 3rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            background-color: rgba(255, 255, 255, 0.3);
+            transition: 0.2s;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.6);
+            color: var(--primary);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            height: 100vh;
+            position: relative;
+            background: var(--bg-body);
+            overflow: hidden;
+        }
+
+        .global-header {
+            height: 80px;
+            background: var(--header-bg);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2.5rem;
+            position: absolute;
+            top: 0;
+            width: 100%;
+        }
+
+        .content-body {
+            height: 100%;
+            overflow-y: auto;
+            padding-top: 80px;
+        }
+
+        .view-section {
+            padding: 2.5rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Income Specific */
+        .tabs {
+            display: flex;
+            gap: 2rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 1rem 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .total-income-card {
+            background: var(--primary);
+            border-radius: var(--radius-xl);
+            padding: 2.5rem;
+            margin-bottom: 2.5rem;
+            color: white;
+            box-shadow: 0 10px 20px -5px var(--primary-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .income-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .income-mini-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+            color: var(--primary);
+        }
+
+        .table-container {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .orders-table th {
+            text-align: left;
+            padding: 1rem 1.5rem;
+            background: #F9FAFB;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .orders-table td {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .badge-status.paid {
+            background: #DEF7EC;
+            color: #03543F;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo">SmartTailor</div>
+        <nav class="nav-menu">
+            <a href="dashboard.html" class="nav-item">Home</a>
+            <a href="order.html" class="nav-item">Orders</a>
+            <a href="reviews.html" class="nav-item">Reviews</a>
+            <a href="income.html" class="nav-item active">Income</a>
+            <a href="messages.html" class="nav-item">Messages</a>
+            <a href="profile.html" class="nav-item">Me</a>
+        </nav>
+    </aside>
+
+    <main class="main-wrapper">
+        <header class="global-header">
+            <div class="header-left" style="display: flex; align-items: center; gap: 1rem;">
+                <a href="dashboard.html"
+                    style="background:none; border:none; cursor:pointer; color:var(--text-main); display:flex; align-items:center;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                </a>
+                <h2>Financial Overview</h2>
+            </div>
+            <div class="header-right">
+                <a href="profile.html" class="profile-header"
+                    style="display: flex; align-items: center; gap: 1rem; text-decoration: none; color: inherit;">
+                    <div class="profile-info" style="text-align: right;">
+                        <h4 style="font-size:0.95rem; font-weight: 600;">Nauman Irshad</h4>
+                        <p style="font-size:0.75rem; color:var(--text-muted);">Tailor Shop</p>
+                    </div>
+                    <img src="images/2.png"
+                        style="width:44px; height:44px; border-radius:50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                </a>
+            </div>
+        </header>
+
+        <div class="content-body">
+            <div class="view-section">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('overview')">
+                        Overview
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('history')">
+                        Order History
+                    </button>
+                </div>
+
+                <div id="overview-section">
+                    <div class="total-income-card">
+                        <p style="font-size:0.9rem; opacity:0.8; text-transform:uppercase; letter-spacing:1px;">
+                            Available Balance</p>
+                        <h2 style="font-size:3rem; font-weight:800; margin:0.5rem 0;">Rs 38,500.00</h2>
+                        <button
+                            style="background:white; color:var(--primary); border:none; padding:0.75rem 1.5rem; border-radius:12px; font-weight:700; cursor:pointer; margin-top:1rem;">Withdraw
+                            to Bank</button>
+                    </div>
+
+                    <div class="income-stats-grid">
+                        <div class="income-mini-card">
+                            <p class="stat-label">Total Earnings</p>
+                            <div style="font-size:1.5rem; font-weight:700; color:var(--primary); margin-top:0.5rem;">Rs
+                                45,250</div>
+                        </div>
+                        <div class="income-mini-card">
+                            <p class="stat-label">Withdrawn</p>
+                            <div style="font-size:1.5rem; font-weight:700; color:var(--text-main); margin-top:0.5rem;">
+                                Rs 6,750</div>
+                        </div>
+                        <div class="income-mini-card">
+                            <p class="stat-label">Pending Clearance</p>
+                            <div style="font-size:1.5rem; font-weight:700; color:var(--warning); margin-top:0.5rem;">Rs
+                                2,100</div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom:1.5rem; font-weight:700;">Recent Transactions</h3>
+                    <div class="table-container">
+                        <table class="orders-table">
+                            <thead>
+                                <tr>
+                                    <th>Ref ID</th>
+                                    <th>Date</th>
+                                    <th>Method</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><b>ORD-2024-001</b></td>
+                                    <td>Oct 18, 2024</td>
+                                    <td>Card</td>
+                                    <td style="color:var(--primary); font-weight:700;">Rs 2,500</td>
+                                    <td><span class="badge-status paid">PAID</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="history-section" style="display:none;">
+                    <div class="table-container">
+                        <table class="orders-table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Order Info</th>
+                                    <th>Participants</th>
+                                    <th>Financials</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div style="display:flex; align-items:center; gap:0.75rem;">
+                                            <img src="images/1.png"
+                                                style="width: 50px; height: 50px; object-fit: cover; border-radius:8px;">
+                                            <div>
+                                                <div style="font-weight:700;">Custom Suit</div>
+                                                <div style="font-size:0.8rem; color:gray;">Size: M</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight:600;">#ORD-2025-001</div>
+                                        <div style="font-size:0.8rem; color:gray;">Oct 12, 2025</div>
+                                    </td>
+                                    <td>
+                                        <div style="font-size:0.85rem;"><span style="color:gray;">User:</span> <b>Ali
+                                                Ahmad</b><br><span style="color:gray;">Seller:</span> <b>Nauman
+                                                Tailors</b></div>
+                                    </td>
+                                    <td>
+                                        <div style="font-size:0.9rem;">
+                                            <div>Price: Rs 4,000</div>
+                                            <div style="font-weight:700; color:var(--primary);">Total: Rs 4,200</div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge-status paid">COMPLETED</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function switchTab(tab) {
+            const overview = document.getElementById('overview-section');
+            const history = document.getElementById('history-section');
+            const btns = document.querySelectorAll('.tab-btn');
+
+            btns.forEach(btn => btn.classList.remove('active'));
+            if (tab === 'overview') {
+                overview.style.display = 'block';
+                history.style.display = 'none';
+                btns[0].classList.add('active');
+            } else {
+                overview.style.display = 'none';
+                history.style.display = 'block';
+                btns[1].classList.add('active');
+            }
+        }
+    </script>
+</body>
+
+</html>

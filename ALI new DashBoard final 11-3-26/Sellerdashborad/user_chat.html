@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - SmartSeller</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --surface: #ffffff;
+            --background: #f8fafc;
+            --text-main: #0f172a;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --nav-height-mobile: 64px;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100%;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #c5b782;
+            border-right: 1px solid var(--border);
+            display: none;
+            flex-direction: column;
+            padding: 1.5rem 1rem;
+            z-index: 50;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 3rem;
+            padding: 0 0.75rem;
+        }
+
+        .brand-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            color: white;
+            font-weight: 700;
+            font-size: 20px;
+        }
+
+        .brand-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.025em;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background-color: #f9fafb;
+            color: var(--primary);
+        }
+
+        .nav-item.active {
+            background-color: #eef2ff;
+            color: var(--primary);
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--background);
+            padding-bottom: var(--nav-height-mobile);
+        }
+
+        .chat-header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .back-btn {
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .chat-user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: grid;
+            place-items: center;
+            font-weight: 600;
+        }
+
+        .chat-name {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            scrollbar-width: thin;
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .message-in {
+            align-self: flex-start;
+            background: white;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .message-out {
+            align-self: flex-end;
+            background: var(--primary);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-input-area {
+            background: white;
+            padding: 12px 16px;
+            display: flex;
+            gap: 12px;
+            border-top: 1px solid var(--border);
+            position: sticky;
+            bottom: var(--nav-height-mobile);
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            outline: none;
+            background: var(--background);
+            font-size: 14px;
+        }
+
+        .send-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            transition: all 0.2s;
+        }
+
+        .send-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        /* --- Bottom Navigation --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: var(--nav-height-mobile);
+            background: var(--surface);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+            z-index: 100;
+            border-top: 1px solid var(--border);
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .bottom-nav-item.active {
+            color: var(--primary);
+        }
+
+        .bottom-nav-item span {
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        @media (min-width: 768px) {
+            .sidebar {
+                display: flex;
+            }
+
+            .bottom-nav {
+                display: none;
+            }
+
+            .main-content {
+                padding-bottom: 0;
+            }
+
+            .chat-input-area {
+                bottom: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-logo">SS</div>
+                <div class="brand-name">SmartSeller</div>
+            </div>
+            <nav class="nav-items">
+                <a class="nav-item" href="bottom_navi.html"><span
+                        class="material-icons-round">home</span><span>Home</span></a>
+                <a class="nav-item" href="product.html"><span
+                        class="material-icons-round">shopping_bag</span><span>Products</span></a>
+                <a class="nav-item" href="3D Studio.html"><span class="material-icons-round">view_in_ar</span><span>3D
+                        Studio</span></a>
+                <a class="nav-item" href="income.html"><span
+                        class="material-icons-round">account_balance_wallet</span><span>Income</span></a>
+                <a class="nav-item active" href="messages.html"><span
+                        class="material-icons-round">message</span><span>Messages</span></a>
+                <a class="nav-item" href="tools.html"><span
+                        class="material-icons-round">grid_view</span><span>Tools</span></a>
+                <a class="nav-item" href="profile.html"><span
+                        class="material-icons-round">person</span><span>Profile</span></a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="chat-header">
+                <button class="back-btn" onclick="goBackToMessages()">
+                    <span class="material-icons-round">arrow_back</span>
+                </button>
+                <div class="chat-user-info">
+                    <div class="chat-avatar" id="avatar">?</div>
+                    <div class="chat-name" id="userName">User Name</div>
+                </div>
+            </header>
+
+            <div class="chat-messages" id="messageContainer">
+                <!-- Messages will be loaded here -->
+            </div>
+
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" placeholder="Type a message..." id="messageInput">
+                <button class="send-btn" onclick="sendMsg()">
+                    <span class="material-icons-round">send</span>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+        <a class="bottom-nav-item" href="bottom_navi.html"><span
+                class="material-icons-round">home</span><span>Home</span></a>
+        <a class="bottom-nav-item" href="product.html"><span
+                class="material-icons-round">shopping_bag</span><span>Products</span></a>
+        <a class="bottom-nav-item" href="income.html"><span
+                class="material-icons-round">account_balance_wallet</span><span>Income</span></a>
+        <a class="bottom-nav-item active" href="messages.html"><span
+                class="material-icons-round">message</span><span>Messages</span></a>
+        <a class="bottom-nav-item" href="tools.html"><span
+                class="material-icons-round">grid_view</span><span>Tools</span></a>
+        <a class="bottom-nav-item" href="profile.html"><span
+                class="material-icons-round">person</span><span>Profile</span></a>
+    </nav>
+
+    <script type="module">
+        import { sendMessage, listenForMessages } from './database.js';
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const name = urlParams.get('name') || 'User';
+        const type = urlParams.get('type') || 'user';
+
+        document.getElementById('userName').innerText = name;
+        document.getElementById('avatar').innerText = name.charAt(0).toUpperCase();
+        if (type === 'tailor') {
+            document.getElementById('avatar').style.background = 'var(--secondary)';
+        }
+
+        const container = document.getElementById('messageContainer');
+        const input = document.getElementById('messageInput');
+
+        window.goBackToMessages = function () {
+            window.location.href = `messages.html?tab=${type}`;
+        };
+
+        // Handle Enter key for sending
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') sendMsg();
+        });
+
+        window.sendMsg = async function () {
+            const text = input.value.trim();
+            if (!text) return;
+
+            const tempInput = text;
+            input.value = ''; // Clear immediately for UX
+
+            try {
+                await sendMessage({
+                    text: tempInput,
+                    sender: 'Seller',
+                    receiver: name,   // Added for compatibility
+                    recipient: name,
+                    chatType: type
+                });
+                console.log("SUCCESS: Message stored in Firebase Firestore.");
+            } catch (error) {
+                console.error("Failed to send:", error);
+                input.value = tempInput; // Restore on failure
+                alert("Failed to send message. Please check your connection.");
+            }
+        };
+
+        listenForMessages((messages) => {
+            container.innerHTML = '';
+
+            // Filter messages for this conversation
+            const filtered = messages.filter(msg => {
+                const isFromMe = msg.sender === 'Seller' || msg.sender === 'tailor';
+                const isFromThem = msg.sender === name;
+                const isToMe = msg.receiver === 'Seller' || msg.recipient === 'Seller' || msg.receiver === 'tailor' || msg.recipient === 'tailor';
+                const isToThem = msg.receiver === name || msg.recipient === name;
+
+                return (isFromMe && isToThem) || (isFromThem && isToMe);
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color:var(--text-secondary); margin-top:20px; font-size:13px;">No messages yet. Say hi!</div>`;
+            }
+
+            filtered.forEach(msg => {
+                const isMine = msg.sender === 'Seller' || msg.sender === 'tailor';
+                const div = document.createElement('div');
+                div.className = `message-bubble ${isMine ? 'message-out' : 'message-in'}`;
+                div.innerText = msg.text;
+                container.appendChild(div);
+            });
+            container.scrollTop = container.scrollHeight;
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Studio - SmartTailor</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <!-- Model Viewer -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light-bg: #eef2ff;
+            --secondary: #ec4899;
+            --bg-body: #f9fafb;
+            --surface: #ffffff;
+            --text-main: #1f2937;
+            --text-secondary: #6b7280;
+            --border: #e5e7eb;
+            --nav-height-mobile: 64px;
+            --sidebar-width: 260px;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100%;
+        }
+
+        /* --- Sidebar (Main App) --- */
+        .app-sidebar {
+            width: var(--sidebar-width);
+            /*background: var(--surface);*/
+            background: #c5b782;
+            border-right: 1px solid var(--border);
+            display: none;
+            flex-direction: column;
+            padding: 1.5rem 1rem;
+            z-index: 50;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 2.5rem;
+            padding: 0 0.75rem;
+        }
+
+        .brand-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            color: white;
+            font-weight: 700;
+            font-size: 20px;
+        }
+
+        .brand-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.025em;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background-color: #f9fafb;
+            color: var(--primary);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-light-bg);
+            color: var(--primary);
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .app-header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: transparent;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--primary);
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+        }
+
+        /* --- 3D Studio Workspace --- */
+        .studio-workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        @media (min-width: 768px) {
+            .studio-workspace {
+                flex-direction: row;
+            }
+        }
+
+        /* --- Selection Sidebar --- */
+        .product-list-sidebar {
+            width: 100%;
+            background: #f9fafb;
+            border-bottom: 1px solid var(--border);
+            padding: 16px;
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        @media (min-width: 768px) {
+            .product-list-sidebar {
+                width: 320px;
+                flex-direction: column;
+                border-bottom: none;
+                border-right: 1px solid var(--border);
+                overflow-x: visible;
+                overflow-y: auto;
+            }
+        }
+
+        .product-list-sidebar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .studio-item {
+            flex-shrink: 0;
+            width: 220px;
+            background: var(--surface);
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-sm);
+        }
+
+        @media (min-width: 768px) {
+            .studio-item {
+                width: 100%;
+            }
+        }
+
+        .studio-item:hover {
+            border-color: var(--primary);
+            transform: scale(1.02);
+            box-shadow: var(--shadow);
+        }
+
+        .studio-item.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .icon-box {
+            width: 44px;
+            height: 44px;
+            background: #f3f4f6;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            color: var(--primary);
+            transition: all 0.2s;
+        }
+
+        .studio-item.active .icon-box {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .item-label {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        /* --- Viewer Area --- */
+        .viewer-area {
+            flex: 1;
+            position: relative;
+            background: radial-gradient(circle at center, #ffffff 0%, #f1f3f6 100%);
+            display: flex;
+            flex-direction: column;
+        }
+
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            --poster-color: transparent;
+        }
+
+        .viewer-controls {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            display: flex;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .control-btn {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            display: grid;
+            place-items: center;
+            color: var(--text-main);
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            background: white;
+            color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .drop-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(99, 102, 241, 0.15);
+            backdrop-filter: blur(8px);
+            border: 3px dashed var(--primary);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            pointer-events: none;
+            transition: all 0.3s;
+        }
+
+        .dragging .drop-overlay {
+            display: flex;
+        }
+
+        .drop-overlay .material-icons-round {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .drop-overlay h2 {
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .btn-upload {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
+            transition: all 0.2s;
+        }
+
+        .btn-upload:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-upload span.material-icons-round {
+            font-size: 18px;
+        }
+
+        .viewer-status {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 16px 24px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            z-index: 50;
+            text-align: center;
+        }
+
+        .viewer-status.active {
+            display: flex;
+        }
+
+        .status-spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--primary-light-bg);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .btn-upload span:not(.material-icons-round) {
+                display: none;
+            }
+
+            .btn-upload {
+                padding: 10px;
+            }
+        }
+
+        .viewer-hint {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+            backdrop-filter: blur(8px);
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- Bottom Nav (Mobile) --- */
+        .app-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: var(--nav-height-mobile);
+            background: var(--surface);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+            z-index: 100;
+            border-top: 1px solid var(--border);
+        }
+
+        .nav-item-m {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        .nav-item-m.active {
+            color: var(--primary);
+        }
+
+        .nav-item-m span {
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        @media (min-width: 768px) {
+            .app-sidebar {
+                display: flex;
+            }
+
+            .app-bottom-nav {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="app-sidebar">
+            <div class="brand">
+                <div class="brand-logo">SS</div>
+                <div class="brand-name">SmartSeller</div>
+            </div>
+            <nav class="nav-items">
+                <a class="nav-item" href="bottom_navi.html"><span
+                        class="material-icons-round">home</span><span>Home</span></a>
+                <a class="nav-item" href="product.html"><span
+                        class="material-icons-round">shopping_bag</span><span>Products</span></a>
+                <a class="nav-item active" href="3D Studio.html"><span
+                        class="material-icons-round">view_in_ar</span><span>3D Studio</span></a>
+                <a class="nav-item" href="income.html"><span
+                        class="material-icons-round">account_balance_wallet</span><span>Income</span></a>
+                <a class="nav-item" href="messages.html"><span
+                        class="material-icons-round">message</span><span>Messages</span></a>
+                <a class="nav-item" href="tools.html"><span
+                        class="material-icons-round">grid_view</span><span>Tools</span></a>
+                <a class="nav-item" href="profile.html"><span
+                        class="material-icons-round">person</span><span>Profile</span></a>
+                <div style="margin-top: auto; padding-top: 20px;">
+                    <a class="nav-item" href="javascript:void(0)" onclick="handleLogout()" style="color: #ef4444;">
+                        <span class="material-icons-round">logout</span>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- App Header -->
+            <header class="app-header">
+                <div class="header-left">
+                    <button class="back-btn" onclick="history.back()" title="Back">
+                        <span class="material-icons-round">arrow_back</span>
+                    </button>
+                    <div class="header-title">3D Studio</div>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <button class="btn-upload" onclick="document.getElementById('model-upload').click()">
+                        <span class="material-icons-round">cloud_upload</span>
+                        <span>Upload Product</span>
+                    </button>
+                    <input type="file" id="model-upload" accept=".gltf, .glb, .bin" style="display: none;" multiple
+                        onchange="handleModelUpload(event)">
+                </div>
+            </header>
+
+            <div class="studio-workspace">
+                <!-- Product List Sidebar -->
+                <div class="product-list-sidebar">
+                    <div class="studio-item active" onclick="loadModel(0, this)">
+                        <div class="icon-box"><span class="material-icons-round">checkroom</span></div>
+                        <div class="item-label">Classic Cotton Royal</div>
+                    </div>
+                    <div class="studio-item" onclick="loadModel(3, this)">
+                        <div class="icon-box"><span class="material-icons-round">palette</span></div>
+                        <div class="item-label">Modern Designer Kurta</div>
+                    </div>
+                    <div class="studio-item" onclick="loadModel(4, this)">
+                        <div class="icon-box"><span class="material-icons-round">flare</span></div>
+                        <div class="item-label">Glaze Cotton Suit</div>
+                    </div>
+                </div>
+
+                <!-- Main Viewer Area -->
+                <div class="viewer-area" id="drop-zone">
+                    <div class="drop-overlay">
+                        <span class="material-icons-round">view_in_ar</span>
+                        <h2>Drop 3D Model Here</h2>
+                        <p>Supports .glb or .gltf + .bin sets</p>
+                    </div>
+
+                    <div id="viewer-status" class="viewer-status">
+                        <div class="status-spinner"></div>
+                        <div id="status-text" style="font-weight: 600; font-size: 14px;">Loading Model...</div>
+                    </div>
+
+                    <model-viewer id="studio-viewer" src="./modelsgltf/product1/sample1.gltf" camera-controls
+                        auto-rotate shadow-intensity="1" environment-image="neutral" exposure="1"
+                        interaction-prompt="none">
+                    </model-viewer>
+
+                    <div class="viewer-controls">
+                        <div class="control-btn" onclick="toggleRotate()">
+                            <span class="material-icons-round" id="rot-icon">sync</span>
+                        </div>
+                        <div class="control-btn" onclick="resetCam()">
+                            <span class="material-icons-round">center_focus_strong</span>
+                        </div>
+                    </div>
+
+                    <div class="viewer-hint">
+                        <span class="material-icons-round" style="font-size: 16px;">3d_rotation</span>
+                        Interactive 3D Preview
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bottom Nav (Mobile) -->
+    <nav class="app-bottom-nav">
+        <a class="nav-item-m" href="bottom_navi.html"><span
+                class="material-icons-round">home</span><span>Home</span></a>
+        <a class="nav-item-m" href="product.html"><span
+                class="material-icons-round">shopping_bag</span><span>Products</span></a>
+        <a class="nav-item-m active" href="3D Studio.html"><span
+                class="material-icons-round">view_in_ar</span><span>Studio</span></a>
+        <a class="nav-item-m" href="messages.html"><span
+                class="material-icons-round">message</span><span>Messages</span></a>
+        <a class="nav-item-m" href="profile.html"><span
+                class="material-icons-round">person</span><span>Profile</span></a>
+    </nav>
+
+    <script>
+        const products = [
+            { id: 1, model: "./modelsgltf/product1/sample1.gltf" },
+            { id: 2, model: "./modelsgltf/product2/sample1.gltf" }, // Hidden
+            { id: 3, model: "./modelsgltf/product3/sample5.gltf" }, // Hidden
+            { id: 4, model: "./modelsgltf/product4/sample8.gltf" },
+            { id: 5, model: "./modelsgltf/product5/sample4.gltf" }
+        ];
+
+        const viewer = document.getElementById('studio-viewer');
+
+        // Capture model-viewer errors
+        viewer.addEventListener('error', (e) => {
+            console.error("Model Viewer Error Details:", e);
+            if (window.location.protocol === 'file:') {
+                console.warn("WARNING: You are running this file via file:// protocol. Browsers often block 3D model dependencies (like .bin files) due to CORS security policies when running locally without a server. Use a local server (like VS Code Live Server) to fix this.");
+            }
+            const status = document.getElementById('viewer-status');
+            const statusText = document.getElementById('status-text');
+            status.classList.add('active');
+            statusText.style.color = "#ef4444";
+            statusText.innerHTML = `<strong>Display Error:</strong><br>Failed to load 3D data.<br><span style="font-size:11px">Check if all files (.bin/textures) were uploaded or if you are using a local server.</span><br><br><button onclick="document.getElementById('viewer-status').classList.remove('active')" style="padding:4px 8px; border-radius:4px; border:1px solid #ddd; cursor:pointer">Close</button>`;
+            if (document.querySelector('.status-spinner')) document.querySelector('.status-spinner').style.display = 'none';
+        });
+
+        function loadModel(index, el) {
+            // UI Update
+            document.querySelectorAll('.studio-item').forEach(item => item.classList.remove('active'));
+            el.classList.add('active');
+
+            // Find product model
+            let modelPath;
+            if (typeof index === 'string') {
+                modelPath = index; // Blob URL
+            } else {
+                modelPath = products[index].model;
+            }
+
+            // Model Update
+            viewer.src = modelPath;
+            console.log(`Switching to model: ${modelPath}`);
+        }
+
+        // --- Drag and Drop Handlers ---
+        function handleDragOver(e) {
+            e.preventDefault();
+            document.body.classList.add('dragging');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            if (e.relatedTarget === null) {
+                document.body.classList.remove('dragging');
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            document.body.classList.remove('dragging');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) processFiles(files);
+        }
+
+        function handleModelUpload(event) {
+            const files = event.target.files;
+            if (files.length > 0) processFiles(files);
+            event.target.value = '';
+        }
+
+        async function processFiles(files) {
+            const fileList = Array.from(files);
+            const gltfFile = fileList.find(f => f.name.toLowerCase().endsWith('.gltf'));
+            const glbFile = fileList.find(f => f.name.toLowerCase().endsWith('.glb'));
+
+            const status = document.getElementById('viewer-status');
+            const statusText = document.getElementById('status-text');
+
+            status.classList.add('active');
+            statusText.innerText = "Processing files...";
+
+            if (glbFile) {
+                const url = URL.createObjectURL(glbFile);
+                addUploadedItem(glbFile.name, url, true);
+                status.classList.remove('active');
+                return;
+            }
+
+            if (!gltfFile) {
+                alert("Please select a .glb file or a folder containing a .gltf and its .bin file.");
+                status.classList.remove('active');
+                return;
+            }
+
+            // --- Multi-file GLTF Relinking ---
+            const resources = new Map();
+            fileList.forEach(file => {
+                const url = URL.createObjectURL(file);
+                // Map both original name and clean name
+                resources.set(file.name, url);
+                resources.set(file.name.split('/').pop(), url);
+            });
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    let json = JSON.parse(e.target.result);
+                    let missing = [];
+
+                    const relink = (uri) => {
+                        if (!uri || uri.startsWith('data:')) return uri;
+                        const cleanUri = uri.split('/').pop().split('\\').pop();
+                        if (resources.has(cleanUri)) return resources.get(cleanUri);
+                        if (resources.has(uri)) return resources.get(uri);
+                        missing.push(uri);
+                        return uri;
+                    };
+
+                    if (json.buffers) json.buffers.forEach(b => b.uri = relink(b.uri));
+                    if (json.images) json.images.forEach(img => img.uri = relink(img.uri));
+
+                    if (missing.length > 0) {
+                        statusText.style.color = "#ef4444";
+                        statusText.innerHTML = `<strong>Missing Files:</strong><br>${missing.map(m => `<span style="font-size:11px">${m}</span>`).join('<br>')}<br><br><button onclick="document.getElementById('viewer-status').classList.remove('active')" style="padding:4px 8px; border-radius:4px; border:1px solid #ddd; cursor:pointer">Close</button>`;
+                        document.querySelector('.status-spinner').style.display = 'none';
+                        return; // Stop here if files are missing
+                    }
+
+                    const blob = new Blob([JSON.stringify(json)], { type: 'application/json' });
+                    const finalUrl = URL.createObjectURL(blob);
+                    addUploadedItem(gltfFile.name, finalUrl, true);
+                    status.classList.remove('active');
+                } catch (err) {
+                    statusText.style.color = "#ef4444";
+                    statusText.innerHTML = "<strong>Error:</strong> Invalid GLTF file structure.";
+                    document.querySelector('.status-spinner').style.display = 'none';
+                    console.error(err);
+                }
+            };
+            reader.readAsText(gltfFile);
+        }
+
+        function addUploadedItem(name, url, isNew = false) {
+            const cleanName = name.split('.')[0].replace(/[-_]/g, ' ');
+            const sidebar = document.querySelector('.product-list-sidebar');
+
+            // Check if item already exists to avoid duplicates
+            if ([...sidebar.querySelectorAll('.item-label')].some(el => el.textContent === cleanName)) {
+                console.log(`Item ${cleanName} already exists in sidebar.`);
+            }
+
+            const newItem = document.createElement('div');
+            newItem.className = 'studio-item';
+            if (isNew) newItem.style.borderLeft = '4px solid var(--secondary)';
+
+            newItem.onclick = function () { loadModel(url, this); };
+
+            newItem.innerHTML = `
+                <div class="icon-box"><span class="material-icons-round">model_training</span></div>
+                <div class="item-label">${cleanName}</div>
+            `;
+
+            sidebar.insertBefore(newItem, sidebar.firstChild);
+
+            if (isNew) {
+                loadModel(url, newItem);
+                saveToRecent(cleanName);
+            }
+        }
+
+        // Simulating "Saving" using LocalStorage for UI labels
+        function saveToRecent(name) {
+            let recent = JSON.parse(localStorage.getItem('recent_3d_uploads') || '[]');
+            if (!recent.includes(name)) {
+                recent.unshift(name);
+                localStorage.setItem('recent_3d_uploads', JSON.stringify(recent.slice(0, 10)));
+            }
+        }
+
+        // Load recent labels on start (Note: Actual Blobs cannot be persisted in localStorage)
+        window.addEventListener('DOMContentLoaded', () => {
+            const recent = JSON.parse(localStorage.getItem('recent_3d_uploads') || '[]');
+            console.log("Recent uploads found:", recent);
+            // In a real server app, we would fetch the actual files here.
+        });
+
+        function toggleRotate() {
+            const icon = document.getElementById('rot-icon');
+            viewer.autoRotate = !viewer.autoRotate;
+            icon.style.color = viewer.autoRotate ? 'var(--primary)' : 'inherit';
+        }
+
+        function resetCam() {
+            viewer.cameraOrbit = '0deg 75deg 105%';
+            viewer.fieldOfView = 'auto';
+        }
+
+        function handleLogout() {
+            if (confirm("Are you sure you want to logout?")) {
+                // Clear local storage
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('userRole');
+
+                // Redirect to Main Index
+                window.location.href = "../index.html";
+            }
+        }
+    </script>
+    <script type="module" src="database.js"></script>
+</body>
+
+</html>
